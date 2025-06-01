@@ -1,4 +1,5 @@
-import { BaseEntity } from 'src/common/entities/base.model';
+import { BaseEntity } from "src/common/entities/base.model";
+
 
 export interface IRepository<T extends BaseEntity> {
   findAll(): Promise<T[]>;

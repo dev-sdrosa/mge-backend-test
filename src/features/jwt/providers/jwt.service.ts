@@ -1,0 +1,167 @@
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
+import { IJwt } from 'src/common/interfaces/jwt.interface';
+import {
+  IAccessPayload,
+  IAccessToken,
+} from 'src/common/interfaces/token/access-token.interface';
+import {
+  IRefreshPayload,
+  IRefreshToken,
+} from 'src/common/interfaces/token/refresh-token.interface';
+import { CommonService } from 'src/common/providers/common.service';
+import { v4 } from 'uuid';
+import * as jwt from 'jsonwebtoken';
+import { TokenTypeEnum } from 'src/common/enums/token.enum';
+import { IUser } from 'src/features/users/interfaces/user.interface';
+
+@Injectable()
+export class JwtService {
+  private readonly jwtConfig: IJwt;
+  private readonly issuer: string;
+  private readonly domain: string;
+
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly commonService: CommonService,
+  ) {
+    this.jwtConfig = this.configService.get<IJwt>('jwt');
+    this.issuer = this.configService.get<string>('id');
+    this.domain = this.configService.get<string>('domain');
+  }
+
+  private static async generateTokenAsync(
+    payload: IAccessPayload | IRefreshPayload,
+    secret: string,
+    options: jwt.SignOptions,
+  ): Promise<string> {
+    return new Promise((resolve, rejects) => {
+      jwt.sign(payload, secret, options, (error, token) => {
+        if (error) {
+          rejects(error);
+          return;
+        }
+        resolve(token);
+      });
+    });
+  }
+
+  private static async verifyTokenAsync<T>(
+    token: string,
+    secret: string,
+    options: jwt.VerifyOptions,
+  ): Promise<T> {
+    return new Promise((resolve, rejects) => {
+      jwt.verify(token, secret, options, (error, payload: T) => {
+        if (error) {
+          rejects(error);
+          return;
+        }
+        resolve(payload);
+      });
+    });
+  }
+
+  public async generateToken(
+    user: IUser,
+    tokenType: TokenTypeEnum,
+    domain?: string | null,
+    tokenId?: string,
+  ): Promise<string> {
+    const jwtOptions: jwt.SignOptions = {
+      issuer: this.issuer,
+      subject: user.email,
+      audience: domain ?? this.domain,
+      algorithm: 'HS256',
+    };
+
+    switch (tokenType) {
+      case TokenTypeEnum.ACCESS:
+        const { privateKey, time: accessTime } = this.jwtConfig.access;
+        return this.commonService.throwInternalError(
+          JwtService.generateTokenAsync(
+            {
+              id: user.id,
+              roles: user.roles ? user.roles.map((role) => role.name) : [],
+            },
+            privateKey,
+            {
+              ...jwtOptions,
+              expiresIn: accessTime,
+              algorithm: 'HS256',
+            },
+          ),
+        );
+      case TokenTypeEnum.REFRESH:
+        const { secret: refreshSecret, time: refreshTime } =
+          this.jwtConfig.refresh;
+        return this.commonService.throwInternalError(
+          JwtService.generateTokenAsync(
+            {
+              id: user.id,
+              tokenId: tokenId ?? v4(),
+            },
+            refreshSecret,
+            {
+              ...jwtOptions,
+              expiresIn: refreshTime,
+            },
+          ),
+        );
+    }
+  }
+
+  public async generateAuthTokens(
+    user: IUser,
+    domain?: string,
+    tokenId?: string,
+  ): Promise<[string, string]> {
+    return Promise.all([
+      this.generateToken(user, TokenTypeEnum.ACCESS, domain, tokenId),
+      this.generateToken(user, TokenTypeEnum.REFRESH, domain, tokenId),
+    ]);
+  }
+
+  private static async throwBadRequest<T extends IAccessToken | IRefreshToken>(
+    promise: Promise<T>,
+  ): Promise<T> {
+    try {
+      return await promise;
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new BadRequestException('Token expired');
+      }
+      if (error instanceof jwt.JsonWebTokenError) {
+        throw new BadRequestException('Invalid token');
+      }
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  public async verifyToken<T extends IAccessToken | IRefreshToken>(
+    token: string,
+    tokenType: TokenTypeEnum,
+  ): Promise<T> {
+    const jwtOptions: jwt.VerifyOptions = {
+      issuer: this.issuer,
+      audience: new RegExp(this.domain),
+    };
+
+    switch (tokenType) {
+      case TokenTypeEnum.ACCESS:
+        const { publicKey, time: accessTime } = this.jwtConfig.access;
+        return JwtService.throwBadRequest(
+          JwtService.verifyTokenAsync(token, publicKey, {
+            ...jwtOptions,
+            maxAge: accessTime,
+            algorithms: ['HS256'],
+          }),
+        );
+    }
+  }
+}

@@ -6,6 +6,7 @@ import { CrudModule } from './features/crud/crud.module';
 import { JwtModule } from './features/jwt/jwt.module';
 import { UsersModule } from './features/users/user.module';
 import { AuthModule } from './features/auth/auth.module';
+import { VehicleModule } from './features/vehicles/vehicle.module';
 import { RouterModule } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as path from 'path';
@@ -40,6 +41,7 @@ import * as path from 'path';
     JwtModule,
     UsersModule,
     AuthModule,
+    VehicleModule,
 
     // Routes
 
@@ -48,6 +50,10 @@ import * as path from 'path';
         path: '',
         module: AuthModule,
       },
+      {
+        path: '',
+        module: VehicleModule,
+      }
     ]),
   ],
 })

@@ -4,12 +4,19 @@ import { ConfigService } from '@nestjs/config';
 import { setupApp } from './config/app.setup';
 import { PermissionSeederService } from './features/auth/seeders/permission.seeder.service';
 import { RoleSeederService } from './features/auth/seeders/role.seeder.service';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
   setupApp(app);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    })
+  );
 
   if (configService.get<string>('NODE_ENV') === 'development') {
     const permissionSeeder = app.get(PermissionSeederService);

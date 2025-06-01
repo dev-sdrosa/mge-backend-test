@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Module, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Permission } from './entities/permission.entity';
 import { Role } from './entities/role.entity';
@@ -13,6 +13,7 @@ import { RoleRepository } from './repositories/role.repository';
 import { RoleController } from './controllers/role.controller';
 import { PermissionRepository } from './repositories/permission.repository';
 
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([Permission, Role]),

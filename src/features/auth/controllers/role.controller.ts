@@ -9,14 +9,29 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { RoleService } from '../providers/role.service';
 import { CreateRoleDto } from '../dtos/create-role.dto';
 import { UpdateRoleDto } from '../dtos/update-role.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Role } from '../entities/role.entity';
+import { AuthGuard } from '../guards/auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
+import { RoleEnum } from '../enums/role.enum';
+import { Roles } from '../decorators/roles.decorator';
 
 @ApiTags('Roles')
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
+@UseGuards(RolesGuard)
+@Roles(RoleEnum.ADMIN)
 @Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}

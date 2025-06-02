@@ -52,11 +52,24 @@ export class UserService extends CrudService<User> {
     username: string,
     forAuth = false,
   ): Promise<User> {
-    const user = await this.userRepository.rp.findOne({
-      where: { username: username.toLowerCase() },
-    });
+    const usernameLower = username.toLowerCase();
+    let query = this.userRepository.rp
+      .createQueryBuilder('user')
+      .where('user.username = :username', { username: usernameLower });
+
+    if (forAuth) {
+      query = query.addSelect('user.password_hash');
+    }
+
+    const user = await query.getOne();
+
     if (forAuth) {
       this.throwUnauthorizedException(user);
+      if (user && !user.password_hash) {
+        throw new UnauthorizedException(
+          'User account configuration error. Password hash missing.',
+        );
+      }
     } else {
       if (!user) {
         throw new NotFoundException('This user does not exists');
@@ -66,12 +79,27 @@ export class UserService extends CrudService<User> {
     return user;
   }
 
-  public async findOneByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.rp.findOne({
-      where: { email: email.toLowerCase() },
-    });
+  public async findOneByEmail(
+    email: string,
+    selectPasswordHash = false,
+  ): Promise<User> {
+    const emailLower = email.toLowerCase();
+    let query = this.userRepository.rp
+      .createQueryBuilder('user')
+      .where('user.email = :email', { email: emailLower });
+
+    if (selectPasswordHash) {
+      query = query.addSelect('user.password_hash');
+    }
+
+    const user = await query.getOne();
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+    if (selectPasswordHash && user && !user.password_hash) {
+      throw new UnauthorizedException(
+        'User account configuration error. Password hash missing.',
+      );
     }
     return user;
   }

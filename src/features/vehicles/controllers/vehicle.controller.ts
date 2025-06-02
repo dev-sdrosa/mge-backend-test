@@ -29,8 +29,7 @@ import { Roles } from 'src/features/auth/decorators/roles.decorator';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
-@UseGuards(AuthGuard)
-@UseGuards(RolesGuard)
+@UseGuards(AuthGuard, RolesGuard)
 @Roles(RoleEnum.ADMIN)
 export class VehicleController {
   constructor(private readonly vehicleService: VehicleService) {}

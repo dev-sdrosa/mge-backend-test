@@ -29,8 +29,7 @@ import { Roles } from '../decorators/roles.decorator';
 
 @ApiTags('Roles')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
-@UseGuards(RolesGuard)
+@UseGuards(AuthGuard, RolesGuard)
 @Roles(RoleEnum.ADMIN)
 @Controller('roles')
 export class RoleController {

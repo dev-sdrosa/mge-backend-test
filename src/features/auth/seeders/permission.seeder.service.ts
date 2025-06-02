@@ -14,11 +14,27 @@ const CRUD_RESOURCES_TO_SEED = [
   'permissions',
 ];
 
-const CRUD_ACTIONS = ['create', 'read', 'update', 'delete'];
+const CRUD_ACTIONS = [
+  'create',
+  'new',
+  'findAll',
+  'findOne',
+  'update',
+  'patch',
+  'remove',
+  'delete',
+];
 
 const SPECIAL_PERMISSIONS_TO_SEED = [
-  { name: PermissionEnum.SYSTEM_ADMIN, description: 'Acceso total a todas las rutas y funcionalidades del sistema.' },
-  { name: PermissionEnum.PROFILE_VIEW, description: 'Permite visualizar el perfil propio del usuario.' },
+  {
+    name: PermissionEnum.SYSTEM_ADMIN,
+    description:
+      'Acceso total a todas las rutas y funcionalidades del sistema.',
+  },
+  {
+    name: PermissionEnum.PROFILE_VIEW,
+    description: 'Permite visualizar el perfil propio del usuario.',
+  },
 ];
 
 @Injectable()
@@ -48,7 +64,9 @@ export class PermissionSeederService {
         await this.permissionRepository.save(existingPermission);
         this.logger.log(`Permission "${name}" description updated.`);
       } else {
-        this.logger.log(`Permission "${name}" already exists and is up to date.`);
+        this.logger.log(
+          `Permission "${name}" already exists and is up to date.`,
+        );
       }
     }
   }
@@ -61,13 +79,19 @@ export class PermissionSeederService {
       for (const action of CRUD_ACTIONS) {
         const permissionName = `${resourceName}:${action}`;
         const permissionDescription = `Permite la acción '${action}' sobre el recurso '${resourceName}'.`;
-        await this.ensurePermissionExists(permissionName, permissionDescription);
+        await this.ensurePermissionExists(
+          permissionName,
+          permissionDescription,
+        );
       }
     }
 
     // Seed special permissions
     for (const specialPermission of SPECIAL_PERMISSIONS_TO_SEED) {
-      await this.ensurePermissionExists(specialPermission.name, specialPermission.description);
+      await this.ensurePermissionExists(
+        specialPermission.name,
+        specialPermission.description,
+      );
     }
 
     this.logger.log('Permissions seeding finished.');

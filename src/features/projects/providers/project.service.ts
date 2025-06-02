@@ -8,16 +8,14 @@ import { Project } from '../entities/project.entity';
 import { CrudService } from 'src/features/crud/providers/crud.service';
 import { CreateProjectDto } from '../dtos/create-project.dto';
 import { UpdateProjectDto } from '../dtos/update-project.dto';
-import { User } from 'src/features/users/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In } from 'typeorm';
+import { UserRepository } from 'src/features/users/repositories/user.repository';
 
 @Injectable()
 export class ProjectService extends CrudService<Project> {
   constructor(
     private readonly projectRepository: ProjectRepository,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository: UserRepository,
   ) {
     super(projectRepository.rp);
   }
@@ -67,7 +65,7 @@ export class ProjectService extends CrudService<Project> {
 
     if (userIds !== undefined) {
       if (userIds.length > 0) {
-        const users = await this.userRepository.findBy({
+        const users = await this.userRepository.rp.findBy({
           id: In(userIds),
         });
         project.users = users;

@@ -38,7 +38,6 @@ export class AuthService {
   public async signIn(dto: SignInDto, domain?: string): Promise<IAuthResult> {
     const { emailOrUsername, password } = dto;
     const user = await this.userByEmailOrUsername(emailOrUsername);
-    // console.log('User in signIn:', emailOrUsername, password, user.password_hash); // For debugging
     if (!(await compare(password, user.password_hash))) {
       throw new UnauthorizedException('Invalid credentials');
     }

@@ -44,7 +44,6 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly userService: UserService,
     private readonly configService: ConfigService,
   ) {
     this.cookieName = this.configService.get<string>('REFRESH_COOKIE');
@@ -145,8 +144,9 @@ export class AuthController {
   @ApiNotFoundResponse({
     description: 'The user is not found.',
   })
+  @ApiBearerAuth()
   @Post('/logout')
-  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles(RoleEnum.USER, RoleEnum.ADMIN)
   @HttpCode(HttpStatus.OK)
   public async logout(

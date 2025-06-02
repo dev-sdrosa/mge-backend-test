@@ -12,6 +12,7 @@ import { RoleSeederService } from './seeders/role.seeder.service';
 import { RoleRepository } from './repositories/role.repository';
 import { RoleController } from './controllers/role.controller';
 import { PermissionRepository } from './repositories/permission.repository';
+import { PermissionController } from './controllers/permission.controller';
 
 @Global()
 @Module({
@@ -27,7 +28,7 @@ import { PermissionRepository } from './repositories/permission.repository';
     PermissionSeederService,
     RoleSeederService,
     RoleRepository,
-    PermissionRepository
+    PermissionRepository,
   ],
   exports: [
     AuthService,

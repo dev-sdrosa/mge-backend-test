@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { setupApp } from './config/app.setup';
 import { PermissionSeederService } from './features/auth/seeders/permission.seeder.service';
+import { UserSeederService } from './features/auth/seeders/user.seeder.service';
 import { RoleSeederService } from './features/auth/seeders/role.seeder.service';
 import { ValidationPipe, Logger } from '@nestjs/common';
 
@@ -22,8 +23,10 @@ async function bootstrap() {
   if (configService.get<string>('NODE_ENV') === 'development') {
     const permissionSeeder = app.get(PermissionSeederService);
     const roleSeeder = app.get(RoleSeederService);
+    const userSeeder = app.get(UserSeederService);
     await permissionSeeder.seed();
     await roleSeeder.seed();
+    await userSeeder.seed();
   }
 
   const port = configService.get<number>('PORT');

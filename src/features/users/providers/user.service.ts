@@ -9,6 +9,7 @@ import { CrudService } from 'src/features/crud/providers/crud.service';
 import { User } from '../entities/user.entity';
 import { UserRepository } from '../repositories/user.repository';
 import { RoleService } from 'src/features/auth/providers/role.service';
+import { RoleEnum } from 'src/features/auth/enums/role.enum';
 
 @Injectable()
 export class UserService extends CrudService<User> {
@@ -23,17 +24,20 @@ export class UserService extends CrudService<User> {
     email: string,
     username: string,
     password: string,
+    roleNameInput?: RoleEnum,
   ): Promise<User> {
     const formattedEmail = email.toLowerCase();
     await this.checkEmailUniqueness(formattedEmail);
 
-    const defaultRole = await this.rolesService.getDefaultUserRole();
+    const role = roleNameInput
+      ? await this.rolesService.getRoleByName(roleNameInput)
+      : await this.rolesService.getRoleByName(RoleEnum.USER);
 
     const user = this.userRepository.create({
       email: formattedEmail,
       username: username,
       password_hash: await hash(password, 10),
-      roles: [defaultRole],
+      roles: [role],
     });
 
     return user;

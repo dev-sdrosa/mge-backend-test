@@ -97,8 +97,8 @@ export class RoleService extends CrudService<Role> {
     return role;
   }
 
-  public async getDefaultUserRole(): Promise<Role> {
-    return this.findByName(RoleEnum.USER);
+  public async getRoleByName(name: RoleEnum): Promise<Role> {
+    return this.findByName(name);
   }
 
   public async findOneById(

@@ -9,7 +9,7 @@ import {
   Body,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UseGuards } from '@nestjs/common'; // Importar UseGuards
+import { UseGuards } from '@nestjs/common';
 import { SignUpDto } from '../dtos/sign-up.dto';
 import { IMessage } from 'src/common/interfaces/message.interface';
 import { AuthService } from '../providers/auth.service';
@@ -28,13 +28,12 @@ import {
   ApiOkResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { PermissionsGuard } from '../guards/permissions.guard';
 import { RolesGuard } from '../guards/roles.guard';
-import { Permissions } from '../decorators/permissions.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { UserService } from 'src/features/users/providers/user.service';
 import { RoleEnum } from '../enums/role.enum';
-import { PermissionEnum } from '../enums/permission.enum';
+import { AuthGuard } from '../guards/auth.guard';
+import { User } from 'src/features/users/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -170,12 +169,10 @@ export class AuthController {
     description: 'The user is not found.',
   })
   @ApiBearerAuth()
-  @UseGuards(RolesGuard, PermissionsGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles(RoleEnum.USER, RoleEnum.ADMIN)
-  @Permissions(PermissionEnum.PROFILE_VIEW)
   @Get('/me')
-  public async getMe(@CurrentUser() id: number): Promise<IAuthResponseUser> {
-    const user = await this.userService.findOneById(id);
+  public async getMe(@CurrentUser() user: User): Promise<IAuthResponseUser> {
     return AuthResponseUserMapper.map(user);
   }
 }

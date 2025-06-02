@@ -10,6 +10,7 @@ import { VehicleModule } from './features/vehicles/vehicle.module';
 import { RouterModule } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as path from 'path';
+import { ProjectsModule } from './features/projects/projects.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import * as path from 'path';
     UsersModule,
     AuthModule,
     VehicleModule,
+    ProjectsModule,
 
     // Routes
 
@@ -53,6 +55,10 @@ import * as path from 'path';
       {
         path: '',
         module: VehicleModule,
+      },
+      {
+        path: '',
+        module: ProjectsModule,
       }
     ]),
   ],

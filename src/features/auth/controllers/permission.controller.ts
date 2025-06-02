@@ -10,14 +10,29 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { PermissionService } from '../providers/permission.service';
 import { CreatePermissionDto } from '../dtos/create-permission.dto';
 import { UpdatePermissionDto } from '../dtos/update-permission.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Permission } from '../entities/permission.entity';
+import { AuthGuard } from '../guards/auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
+import { PermissionsGuard } from '../guards/permissions.guard';
+import { RoleEnum } from '../enums/role.enum';
+import { Roles } from '../decorators/roles.decorator';
 
 @ApiTags('Permissions')
+@ApiBearerAuth()
+@UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
 @Controller('permissions')
+@Roles(RoleEnum.ADMIN)
 export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 

@@ -24,13 +24,14 @@ import {
 import { Project } from '../entities/project.entity';
 import { AuthGuard } from 'src/features/auth/guards/auth.guard';
 import { RolesGuard } from 'src/features/auth/guards/roles.guard';
+import { PermissionsGuard } from 'src/features/auth/guards/permissions.guard';
 import { RoleEnum } from 'src/features/auth/enums/role.enum';
 import { Roles } from 'src/features/auth/decorators/roles.decorator';
 
 @ApiTags('Projects')
 @Controller('projects')
-@UseGuards(AuthGuard, RolesGuard)
 @ApiBearerAuth()
+@UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 

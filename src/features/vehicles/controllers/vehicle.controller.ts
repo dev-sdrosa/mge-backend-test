@@ -23,14 +23,15 @@ import {
 import { Vehicle } from '../entities/vehicle.entity';
 import { AuthGuard } from 'src/features/auth/guards/auth.guard';
 import { RolesGuard } from 'src/features/auth/guards/roles.guard';
+import { PermissionsGuard } from 'src/features/auth/guards/permissions.guard';
 import { UseGuards } from '@nestjs/common';
 import { RoleEnum } from 'src/features/auth/enums/role.enum';
 import { Roles } from 'src/features/auth/decorators/roles.decorator';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(RoleEnum.ADMIN)
+@ApiBearerAuth()
+@UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
 export class VehicleController {
   constructor(private readonly vehicleService: VehicleService) {}
 
@@ -45,7 +46,7 @@ export class VehicleController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Bad Request. Invalid input data.',
   })
-  @ApiBearerAuth()
+  @Roles(RoleEnum.ADMIN)
   create(@Body() createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
     return this.vehicleService.new(createVehicleDto);
   }
@@ -57,7 +58,7 @@ export class VehicleController {
     description: 'List of all vehicles.',
     type: [Vehicle],
   })
-  @ApiBearerAuth()
+  @Roles(RoleEnum.USER, RoleEnum.ADMIN)
   findAll(): Promise<Vehicle[]> {
     return this.vehicleService.findAll();
   }
@@ -74,7 +75,7 @@ export class VehicleController {
     status: HttpStatus.NOT_FOUND,
     description: 'Vehicle not found.',
   })
-  @ApiBearerAuth()
+  @Roles(RoleEnum.USER, RoleEnum.ADMIN)
   findOne(@Param('id', ParseIntPipe) id: number): Promise<Vehicle | null> {
     return this.vehicleService.findById(id);
   }
@@ -91,7 +92,7 @@ export class VehicleController {
     status: HttpStatus.NOT_FOUND,
     description: 'Vehicle not found.',
   })
-  @ApiBearerAuth()
+  @Roles(RoleEnum.ADMIN)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateVehicleDto: UpdateVehicleDto,
@@ -111,7 +112,7 @@ export class VehicleController {
     status: HttpStatus.NOT_FOUND,
     description: 'Vehicle not found.',
   })
-  @ApiBearerAuth()
+  @Roles(RoleEnum.ADMIN)
   remove(@Param('id') id: number): Promise<void> {
     return this.vehicleService.delete(id);
   }

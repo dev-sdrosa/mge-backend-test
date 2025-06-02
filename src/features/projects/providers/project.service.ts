@@ -8,10 +8,17 @@ import { Project } from '../entities/project.entity';
 import { CrudService } from 'src/features/crud/providers/crud.service';
 import { CreateProjectDto } from '../dtos/create-project.dto';
 import { UpdateProjectDto } from '../dtos/update-project.dto';
+import { User } from 'src/features/users/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class ProjectService extends CrudService<Project> {
-  constructor(private readonly projectRepository: ProjectRepository) {
+  constructor(
+    private readonly projectRepository: ProjectRepository,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {
     super(projectRepository.rp);
   }
 
@@ -39,7 +46,7 @@ export class ProjectService extends CrudService<Project> {
       throw new NotFoundException(`Project with ID "${id}" not found.`);
     }
 
-    const { name, description } = updateProjectDto;
+    const { name, description, userIds } = updateProjectDto;
 
     if (name && name !== project.name) {
       const existingProjectWithNewName =
@@ -56,6 +63,17 @@ export class ProjectService extends CrudService<Project> {
 
     if (description !== undefined) {
       project.description = description;
+    }
+
+    if (userIds !== undefined) {
+      if (userIds.length > 0) {
+        const users = await this.userRepository.findBy({
+          id: In(userIds),
+        });
+        project.users = users;
+      } else {
+        project.users = [];
+      }
     }
 
     return this.projectRepository.rp.save(project);

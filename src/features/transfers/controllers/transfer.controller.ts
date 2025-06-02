@@ -26,8 +26,6 @@ import { Transfer } from '../entities/transfer.entity';
 import { AuthGuard } from 'src/features/auth/guards/auth.guard';
 import { User } from 'src/features/users/entities/user.entity';
 import { PermissionsGuard } from 'src/features/auth/guards/permissions.guard';
-import { Permissions } from 'src/features/auth/decorators/permissions.decorator';
-import { PermissionEnum } from 'src/features/auth/enums/permission.enum';
 import { RolesGuard } from 'src/features/auth/guards/roles.guard';
 
 @ApiTags('Transfers')
@@ -38,7 +36,6 @@ export class TransferController {
   constructor(private readonly transferService: TransferService) {}
 
   @Post()
-  @Permissions(PermissionEnum.CREATE_TRANSFER)
   @ApiOperation({ summary: 'Create a new transfer' })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -62,7 +59,6 @@ export class TransferController {
   }
 
   @Get()
-  @Permissions(PermissionEnum.VIEW_TRANSFERS)
   @ApiOperation({ summary: 'Get all transfers accessible by the user' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -78,7 +74,6 @@ export class TransferController {
   }
 
   @Get(':id')
-  @Permissions(PermissionEnum.VIEW_TRANSFERS)
   @ApiOperation({ summary: 'Get a specific transfer by ID' })
   @ApiParam({ name: 'id', description: 'Transfer ID', type: Number })
   @ApiResponse({
@@ -102,7 +97,6 @@ export class TransferController {
   }
 
   @Patch(':id')
-  @Permissions(PermissionEnum.EDIT_TRANSFER)
   @ApiOperation({ summary: 'Update an existing transfer' })
   @ApiParam({ name: 'id', description: 'Transfer ID', type: Number })
   @ApiResponse({
@@ -133,7 +127,6 @@ export class TransferController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Permissions(PermissionEnum.DELETE_TRANSFER)
   @ApiOperation({ summary: 'Delete a transfer' })
   @ApiParam({ name: 'id', description: 'Transfer ID', type: Number })
   @ApiResponse({

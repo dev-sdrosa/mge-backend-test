@@ -34,6 +34,7 @@ import { Permissions } from '../decorators/permissions.decorator';
 import { Roles } from '../decorators/roles.decorator';
 import { UserService } from 'src/features/users/providers/user.service';
 import { RoleEnum } from '../enums/role.enum';
+import { PermissionEnum } from '../enums/permission.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -171,7 +172,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(RoleEnum.USER, RoleEnum.ADMIN)
-  @Permissions('profile:view')
+  @Permissions(PermissionEnum.PROFILE_VIEW)
   @Get('/me')
   public async getMe(@CurrentUser() id: number): Promise<IAuthResponseUser> {
     const user = await this.userService.findOneById(id);

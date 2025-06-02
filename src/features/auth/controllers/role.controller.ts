@@ -24,12 +24,13 @@ import {
 import { Role } from '../entities/role.entity';
 import { AuthGuard } from '../guards/auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
+import { PermissionsGuard } from '../guards/permissions.guard';
 import { RoleEnum } from '../enums/role.enum';
 import { Roles } from '../decorators/roles.decorator';
 
 @ApiTags('Roles')
 @ApiBearerAuth()
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
 @Roles(RoleEnum.ADMIN)
 @Controller('roles')
 export class RoleController {

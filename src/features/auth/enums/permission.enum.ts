@@ -1,20 +1,48 @@
 export enum PermissionEnum {
+  // Special Permissions
   SYSTEM_ADMIN = 'system_admin',
-  VIEW_TRANSFERS = 'view_transfers',
-  CREATE_TRANSFER = 'create_transfer',
-  EDIT_TRANSFER = 'edit_transfer',
-  DELETE_TRANSFER = 'delete_transfer',
-  VIEW_VEHICLES = 'view_vehicles',
-  CREATE_VEHICLE = 'create_vehicle',
-  EDIT_VEHICLE = 'edit_vehicle',
-  DELETE_VEHICLE = 'delete_vehicle',
-  VIEW_PROJECTS = 'view_projects',
-  CREATE_PROJECT = 'create_project',
-  EDIT_PROJECT = 'edit_project',
-  DELETE_PROJECT = 'delete_project',
-  VIEW_ORGANIZATIONAL_UNITS = 'view_organizational_units',
-  CREATE_ORGANIZATIONAL_UNIT = 'create_organizational_unit',
-  EDIT_ORGANIZATIONAL_UNIT = 'edit_organizational_unit',
-  DELETE_ORGANIZATIONAL_UNIT = 'delete_organizational_unit',
   PROFILE_VIEW = 'profile:view',
+
+  // Transfers Resource
+  TRANSFERS_CREATE = 'transfers:create',
+  TRANSFERS_READ = 'transfers:read',
+  TRANSFERS_UPDATE = 'transfers:update',
+  TRANSFERS_DELETE = 'transfers:delete',
+
+  // Vehicles Resource
+  VEHICLES_CREATE = 'vehicles:create',
+  VEHICLES_READ = 'vehicles:read',
+  VEHICLES_UPDATE = 'vehicles:update',
+  VEHICLES_DELETE = 'vehicles:delete',
+
+  // Projects Resource
+  PROJECTS_CREATE = 'projects:create',
+  PROJECTS_READ = 'projects:read',
+  PROJECTS_UPDATE = 'projects:update',
+  PROJECTS_DELETE = 'projects:delete',
+
+  // Organizational Units Resource
+  ORGANIZATIONALUNITS_CREATE = 'organizationalunits:create',
+  ORGANIZATIONALUNITS_READ = 'organizationalunits:read',
+  ORGANIZATIONALUNITS_UPDATE = 'organizationalunits:update',
+  ORGANIZATIONALUNITS_DELETE = 'organizationalunits:delete',
+
+  // Users Resource
+  USERS_CREATE = 'users:create',
+  USERS_READ = 'users:read',
+  USERS_UPDATE = 'users:update',
+  USERS_DELETE = 'users:delete',
+  USERS_ASSIGN_ROLE = 'users:assign_role', // Example custom action
+
+  // Roles Resource
+  ROLES_CREATE = 'roles:create',
+  ROLES_READ = 'roles:read',
+  ROLES_UPDATE = 'roles:update',
+  ROLES_DELETE = 'roles:delete',
+
+  // Permissions Resource
+  PERMISSIONS_CREATE = 'permissions:create',
+  PERMISSIONS_READ = 'permissions:read',
+  PERMISSIONS_UPDATE = 'permissions:update',
+  PERMISSIONS_DELETE = 'permissions:delete',
 }

@@ -9,14 +9,28 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { OrganizationalUnitService } from '../providers/organizational-unit.service';
 import { CreateOrganizationalUnitDto } from '../dtos/create-organizational-unit.dto';
 import { UpdateOrganizationalUnitDto } from '../dtos/update-organizational-unit.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { OrganizationalUnit } from '../entities/organizational-unit.entity';
+import { AuthGuard } from 'src/features/auth/guards/auth.guard';
+import { RolesGuard } from 'src/features/auth/guards/roles.guard';
+import { PermissionsGuard } from 'src/features/auth/guards/permissions.guard';
+import { RoleEnum } from 'src/features/auth/enums/role.enum';
+import { Roles } from 'src/features/auth/decorators/roles.decorator';
 
 @ApiTags('Organizational Units')
+@ApiBearerAuth()
+@UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
 @Controller('organizational-units')
 export class OrganizationalUnitController {
   constructor(
@@ -39,6 +53,7 @@ export class OrganizationalUnitController {
     description:
       'Conflict. Organizational unit name already exists in this project.',
   })
+  @Roles(RoleEnum.ADMIN)
   create(
     @Body() createOrganizationalUnitDto: CreateOrganizationalUnitDto,
   ): Promise<OrganizationalUnit> {
@@ -52,6 +67,7 @@ export class OrganizationalUnitController {
     description: 'List of all organizational units.',
     type: [OrganizationalUnit],
   })
+  @Roles(RoleEnum.USER, RoleEnum.ADMIN)
   findAll(): Promise<OrganizationalUnit[]> {
     return this.organizationalUnitService.findAll();
   }
@@ -68,6 +84,7 @@ export class OrganizationalUnitController {
     status: HttpStatus.NOT_FOUND,
     description: 'Organizational unit not found.',
   })
+  @Roles(RoleEnum.USER, RoleEnum.ADMIN)
   findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<OrganizationalUnit | null> {
@@ -91,6 +108,7 @@ export class OrganizationalUnitController {
     description:
       'Conflict. Organizational unit name already exists in this project.',
   })
+  @Roles(RoleEnum.ADMIN)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrganizationalUnitDto: UpdateOrganizationalUnitDto,
@@ -113,6 +131,7 @@ export class OrganizationalUnitController {
     status: HttpStatus.NOT_FOUND,
     description: 'Organizational unit not found.',
   })
+  @Roles(RoleEnum.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.organizationalUnitService.delete(id);
   }

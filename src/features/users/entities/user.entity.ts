@@ -2,6 +2,7 @@ import { Entity, Column, ManyToMany, JoinTable, Index } from 'typeorm';
 import { BaseEntity } from 'src/common/entities/base.model';
 import { Role } from 'src/features/auth/entities/role.entity';
 import { Project } from 'src/features/projects/entities/project.entity';
+import { OrganizationalUnit } from 'src/features/organizational-units/entities/organizational-unit.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -25,4 +26,7 @@ export class User extends BaseEntity {
 
   @ManyToMany(() => Project, (project) => project.users)
   projects: Project[];
+
+  @ManyToMany(() => OrganizationalUnit, (ou) => ou.users)
+  organizationalUnits: OrganizationalUnit[];
 }

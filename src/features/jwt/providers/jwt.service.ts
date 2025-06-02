@@ -34,13 +34,13 @@ export class JwtService {
   ) {
     this.jwtAccessSecret = this.configService.get<string>('JWT_SECRET');
     this.jwtAccessTime = this.configService.get<number>('JWT_ACCESS_TIME');
-    this.jwtRefreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+    this.jwtRefreshSecret =
+      this.configService.get<string>('JWT_REFRESH_SECRET');
     this.jwtRefreshTime = this.configService.get<number>('JWT_REFRESH_TIME');
 
     const appId = this.configService.get<number | string>('APP_ID');
     this.issuer = appId ? String(appId) : 'default-issuer';
     this.domain = this.configService.get<string>('domain');
-
   }
 
   private static async generateTokenAsync(
@@ -165,6 +165,18 @@ export class JwtService {
             maxAge: this.jwtAccessTime,
             algorithms: ['HS256'],
           }),
+        );
+      case TokenTypeEnum.REFRESH:
+        return JwtService.throwBadRequest(
+          JwtService.verifyTokenAsync(token, this.jwtRefreshSecret, {
+            ...jwtOptions,
+            maxAge: this.jwtRefreshTime,
+            algorithms: ['HS256'],
+          }),
+        );
+      default:
+        throw new InternalServerErrorException(
+          `Unsupported token type: ${tokenType}`,
         );
     }
   }

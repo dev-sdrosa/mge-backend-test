@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { IJwt } from 'src/common/interfaces/jwt.interface';
 import {
   IAccessPayload,
   IAccessToken,
@@ -22,17 +21,26 @@ import { IUser } from 'src/features/users/interfaces/user.interface';
 
 @Injectable()
 export class JwtService {
-  private readonly jwtConfig: IJwt;
   private readonly issuer: string;
   private readonly domain: string;
+  private readonly jwtAccessSecret: string;
+  private readonly jwtAccessTime: number;
+  private readonly jwtRefreshSecret: string;
+  private readonly jwtRefreshTime: number;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly commonService: CommonService,
   ) {
-    this.jwtConfig = this.configService.get<IJwt>('jwt');
-    this.issuer = this.configService.get<string>('id');
+    this.jwtAccessSecret = this.configService.get<string>('JWT_SECRET');
+    this.jwtAccessTime = this.configService.get<number>('JWT_ACCESS_TIME');
+    this.jwtRefreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+    this.jwtRefreshTime = this.configService.get<number>('JWT_REFRESH_TIME');
+
+    const appId = this.configService.get<number | string>('APP_ID');
+    this.issuer = appId ? String(appId) : 'default-issuer';
     this.domain = this.configService.get<string>('domain');
+
   }
 
   private static async generateTokenAsync(
@@ -82,34 +90,31 @@ export class JwtService {
 
     switch (tokenType) {
       case TokenTypeEnum.ACCESS:
-        const { privateKey, time: accessTime } = this.jwtConfig.access;
         return this.commonService.throwInternalError(
           JwtService.generateTokenAsync(
             {
               id: user.id,
               roles: user.roles ? user.roles.map((role) => role.name) : [],
             },
-            privateKey,
+            this.jwtAccessSecret,
             {
               ...jwtOptions,
-              expiresIn: accessTime,
+              expiresIn: this.jwtAccessTime,
               algorithm: 'HS256',
             },
           ),
         );
       case TokenTypeEnum.REFRESH:
-        const { secret: refreshSecret, time: refreshTime } =
-          this.jwtConfig.refresh;
         return this.commonService.throwInternalError(
           JwtService.generateTokenAsync(
             {
               id: user.id,
               tokenId: tokenId ?? v4(),
             },
-            refreshSecret,
+            this.jwtRefreshSecret,
             {
               ...jwtOptions,
-              expiresIn: refreshTime,
+              expiresIn: this.jwtRefreshTime,
             },
           ),
         );
@@ -154,11 +159,10 @@ export class JwtService {
 
     switch (tokenType) {
       case TokenTypeEnum.ACCESS:
-        const { publicKey, time: accessTime } = this.jwtConfig.access;
         return JwtService.throwBadRequest(
-          JwtService.verifyTokenAsync(token, publicKey, {
+          JwtService.verifyTokenAsync(token, this.jwtAccessSecret, {
             ...jwtOptions,
-            maxAge: accessTime,
+            maxAge: this.jwtAccessTime,
             algorithms: ['HS256'],
           }),
         );

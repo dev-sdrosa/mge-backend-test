@@ -11,7 +11,6 @@ import { CreateProjectDto } from '../dtos/create-project.dto';
 import { UpdateProjectDto } from '../dtos/update-project.dto';
 import { In } from 'typeorm';
 import { UserRepository } from 'src/features/users/repositories/user.repository';
-import { User } from 'src/features/users/entities/user.entity';
 
 @Injectable()
 export class ProjectService extends CrudService<Project> {

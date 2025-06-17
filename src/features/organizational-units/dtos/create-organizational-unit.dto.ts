@@ -1,5 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength, IsNumber } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  IsNumber,
+  IsOptional,
+  IsArray,
+} from 'class-validator';
 
 export class CreateOrganizationalUnitDto {
   @ApiProperty({
@@ -20,4 +27,15 @@ export class CreateOrganizationalUnitDto {
   @IsNotEmpty()
   @IsNumber()
   project_id: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Optional list of user IDs to associate with the organizational unit.',
+    type: [Number],
+    example: [1, 2],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  userIds?: number[];
 }

@@ -10,9 +10,9 @@ import { CreateTransferDto } from '../dtos/create-transfer.dto';
 import { UpdateTransferDto } from '../dtos/update-transfer.dto';
 import { User } from 'src/features/users/entities/user.entity';
 import { VehicleRepository } from 'src/features/vehicles/repositories/vehicle.repository';
-import { ProjectRepository } from 'src/features/projects/repositories/project.repository';
 import { OrganizationalUnitRepository } from 'src/features/organizational-units/repositories/organizational-unit.repository';
 import { TransferRepository } from '../repositories/transfer.repository';
+import { UserRepository } from 'src/features/users/repositories/user.repository';
 import { CrudService } from 'src/features/crud/providers/crud.service';
 
 @Injectable()
@@ -21,6 +21,7 @@ export class TransferService extends CrudService<Transfer> {
     private readonly transferRepository: TransferRepository,
     private readonly vehicleRepository: VehicleRepository,
     private readonly organizationalUnitRepository: OrganizationalUnitRepository,
+    private readonly userRepository: UserRepository,
   ) {
     super(transferRepository.rp);
   }
@@ -30,7 +31,11 @@ export class TransferService extends CrudService<Transfer> {
     projectId: number,
     organizationalUnitId: number,
   ): Promise<void> {
-    const hasProjectAccess = user.projects?.some((p) => p.id === projectId);
+    const userWithRelations =
+      await this.userRepository.findByIdWithProjectsAndOUs(user.id);
+    const hasProjectAccess = userWithRelations.projects?.some(
+      (p) => p.id === projectId,
+    );
     if (!hasProjectAccess) {
       throw new ForbiddenException(
         `User does not have access to project ID ${projectId}.`,
@@ -47,7 +52,7 @@ export class TransferService extends CrudService<Transfer> {
       );
     }
 
-    const hasOUAccess = user.organizationalUnits?.some(
+    const hasOUAccess = userWithRelations.organizationalUnits?.some(
       (uou) => uou.id === organizationalUnitId,
     );
     if (!hasOUAccess) {
@@ -61,21 +66,36 @@ export class TransferService extends CrudService<Transfer> {
     vehicleId: number,
     clientId?: number,
   ): Promise<void> {
-    const vehicleExists = await this.vehicleRepository.findById(vehicleId);
+    const vehicleExists = await this.vehicleRepository.exists(vehicleId);
+
     if (!vehicleExists) {
       throw new BadRequestException(
         `Vehicle with ID "${vehicleId}" not found.`,
       );
     }
+
+    const userExists = await this.userRepository.exists(clientId);
+
+    if (!userExists) {
+      throw new BadRequestException(`User with ID "${clientId}" not found.`);
+    }
   }
 
   async findAllForUser(user: User): Promise<Transfer[]> {
-    if (!user.projects?.length || !user.organizationalUnits?.length) {
+    const userWithRelations =
+      await this.userRepository.findByIdWithProjectsAndOUs(user.id);
+
+    if (
+      !userWithRelations.projects?.length ||
+      !userWithRelations.organizationalUnits?.length
+    ) {
       return [];
     }
 
-    const projectIds = user.projects.map((p) => p.id);
-    const organizationalUnitIds = user.organizationalUnits.map((ou) => ou.id);
+    const projectIds = userWithRelations.projects.map((p) => p.id);
+    const organizationalUnitIds = userWithRelations.organizationalUnits.map(
+      (ou) => ou.id,
+    );
 
     return this.transferRepository.rp.find({
       where: {

@@ -18,4 +18,13 @@ export class UserRepository extends BaseRepository<User> {
       relations: ['roles', 'roles.permissions'],
     });
   }
+
+  public async findByIdWithProjectsAndOUs(
+    id: number,
+  ): Promise<User | null> {
+    return this.rp.findOne({
+      where: { id },
+      relations: ['projects', 'organizationalUnits'],
+    });
+  }
 }

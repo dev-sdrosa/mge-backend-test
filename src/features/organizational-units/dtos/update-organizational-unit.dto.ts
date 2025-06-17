@@ -1,5 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, MaxLength, IsNumber } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  MaxLength,
+  IsNumber,
+  IsArray,
+} from 'class-validator';
 
 export class UpdateOrganizationalUnitDto {
   @ApiPropertyOptional({
@@ -21,4 +27,15 @@ export class UpdateOrganizationalUnitDto {
   @IsOptional()
   @IsNumber()
   project_id?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Optional list of user IDs to associate with the organizational unit. This will replace existing users if provided.',
+    type: [Number],
+    example: [3, 4],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  userIds?: number[];
 }

@@ -10,6 +10,15 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 export abstract class BaseRepository<T extends BaseEntity> {
   constructor(private readonly repository: Repository<T>) {}
 
+  async exists(id: number): Promise<boolean> {
+    const entity = await this.repository.exists({
+      where: {
+        id: id,
+      } as FindOptionsWhere<T>,
+    });
+    return entity !== null;
+  }
+
   async findAll(): Promise<T[]> {
     return this.repository.find();
   }

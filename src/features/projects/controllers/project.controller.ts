@@ -10,7 +10,6 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { ProjectService } from '../providers/project.service';
 import { CreateProjectDto } from '../dtos/create-project.dto';
@@ -28,7 +27,6 @@ import { RolesGuard } from 'src/features/auth/guards/roles.guard';
 import { PermissionsGuard } from 'src/features/auth/guards/permissions.guard';
 import { RoleEnum } from 'src/features/auth/enums/role.enum';
 import { Roles } from 'src/features/auth/decorators/roles.decorator';
-import { User } from 'src/features/users/entities/user.entity';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -53,11 +51,8 @@ export class ProjectController {
     description: 'Conflict. Project name already exists.',
   })
   @Roles(RoleEnum.ADMIN)
-  create(
-    @Body() createProjectDto: CreateProjectDto,
-    @Req() req: { user: User },
-  ): Promise<Project> {
-    return this.projectService.new(createProjectDto, req.user);
+  create(@Body() createProjectDto: CreateProjectDto): Promise<Project> {
+    return this.projectService.new(createProjectDto);
   }
 
   @Get()

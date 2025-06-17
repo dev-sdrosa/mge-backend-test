@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  BadRequestException,
   ConflictException,
 } from '@nestjs/common';
 import { ProjectRepository } from '../repositories/project.repository';
@@ -12,7 +13,6 @@ import { In } from 'typeorm';
 import { UserRepository } from 'src/features/users/repositories/user.repository';
 import { User } from 'src/features/users/entities/user.entity';
 
-
 @Injectable()
 export class ProjectService extends CrudService<Project> {
   constructor(
@@ -22,8 +22,8 @@ export class ProjectService extends CrudService<Project> {
     super(projectRepository.rp);
   }
 
-  async new(createProjectDto: CreateProjectDto, user: User): Promise<Project> {
-    const { name, description } = createProjectDto;
+  async new(createProjectDto: CreateProjectDto): Promise<Project> {
+    const { name, description, userIds } = createProjectDto;
 
     const existingProject = await this.projectRepository.rp.findOne({
       where: { name },
@@ -34,11 +34,28 @@ export class ProjectService extends CrudService<Project> {
       );
     }
 
-    const newProject = this.projectRepository.rp.create({
+    const projectData: Partial<Project> = {
       name,
       description,
-    });
-    return this.projectRepository.rp.save({ ...newProject, users: [user] });
+    };
+
+    if (userIds && userIds.length > 0) {
+      const users = await this.userRepository.rp.findBy({ id: In(userIds) });
+      if (users.length !== userIds.length) {
+        const foundUserIds = users.map((u) => u.id);
+        const notFoundUserIds = userIds.filter(
+          (id) => !foundUserIds.includes(id),
+        );
+        throw new BadRequestException(
+          `Users with the following IDs were not found: ${notFoundUserIds.join(', ')}`,
+        );
+      }
+      projectData.users = users;
+    } else {
+      projectData.users = [];
+    }
+
+    return this.projectRepository.create(projectData);
   }
 
   async update(

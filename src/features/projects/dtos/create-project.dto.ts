@@ -1,5 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  MinLength,
+  IsOptional,
+  IsArray,
+  IsNumber,
+  ArrayMinSize,
+} from 'class-validator';
 
 export class CreateProjectDto {
   @ApiProperty({
@@ -20,4 +29,14 @@ export class CreateProjectDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Optional list of user IDs to associate with the project.',
+    type: [Number],
+    example: [1, 2],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  userIds?: number[];
 }

@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, ManyToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { OrganizationalUnit } from '../../organizational-units/entities/organizational-unit.entity';
 import { BaseEntity } from 'src/common/entities/base.model';
 import { User } from 'src/features/users/entities/user.entity';
@@ -18,5 +18,10 @@ export class Project extends BaseEntity {
   organizationalUnits: OrganizationalUnit[];
 
   @ManyToMany(() => User, (user) => user.projects)
+  @JoinTable({
+    name: 'project_users',
+    joinColumn: { name: 'project_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
+  })
   users: User[];
 }

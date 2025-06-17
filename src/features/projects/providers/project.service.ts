@@ -10,6 +10,8 @@ import { CreateProjectDto } from '../dtos/create-project.dto';
 import { UpdateProjectDto } from '../dtos/update-project.dto';
 import { In } from 'typeorm';
 import { UserRepository } from 'src/features/users/repositories/user.repository';
+import { User } from 'src/features/users/entities/user.entity';
+
 
 @Injectable()
 export class ProjectService extends CrudService<Project> {
@@ -20,7 +22,7 @@ export class ProjectService extends CrudService<Project> {
     super(projectRepository.rp);
   }
 
-  async new(createProjectDto: CreateProjectDto): Promise<Project> {
+  async new(createProjectDto: CreateProjectDto, user: User): Promise<Project> {
     const { name, description } = createProjectDto;
 
     const existingProject = await this.projectRepository.rp.findOne({
@@ -32,7 +34,11 @@ export class ProjectService extends CrudService<Project> {
       );
     }
 
-    return this.projectRepository.create({ name, description });
+    const newProject = this.projectRepository.rp.create({
+      name,
+      description,
+    });
+    return this.projectRepository.rp.save({ ...newProject, users: [user] });
   }
 
   async update(
